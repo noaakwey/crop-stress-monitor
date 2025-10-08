@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 noaakwey
+Copyright (c) 2025 Artur Gafurov, Kazan Federal University
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## Attribution Requirements
+
+If you use this software in academic work, please cite:
+
+```
+Gafurov, A. (2025). Interactive Web-Based System for Agricultural Stress 
+Detection using UAV Multispectral Data. Kazan Federal University.
+GitHub: https://github.com/YOUR_USERNAME/crop-stress-monitor
+```
+
+For BibTeX:
+
+```bibtex
+@software{gafurov2025cropstress,
+  author = {Gafurov, Artur},
+  title = {Interactive Web-Based System for Agricultural Stress Detection 
+           using UAV Multispectral Data},
+  year = {2025},
+  publisher = {GitHub},
+  url = {https://github.com/YOUR_USERNAME/crop-stress-monitor}
+}
+```

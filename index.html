@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг стрессов полей - Кызылординская область</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #container {
+            display: flex;
+            height: 100vh;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+        
+        /* Боковая панель */
+        #sidebar {
+            width: 380px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .stat-card .label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212529;
+        }
+        
+        .stat-card .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .legend {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .legend h3 {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .legend-label {
+            font-size: 13px;
+            color: #495057;
+        }
+        
+        .filters {
+            padding: 20px;
+        }
+        
+        .filters h3 {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .filter-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .field-list {
+            padding: 20px;
+        }
+        
+        .field-list h3 {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .field-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .field-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .field-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .field-id {
+            font-weight: 600;
+            font-size: 14px;
+            color: #212529;
+        }
+        
+        .stress-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .stress-badge.critical {
+            background: #fee;
+            color: #dc3545;
+        }
+        
+        .stress-badge.moderate {
+            background: #fff3cd;
+            color: #f57c00;
+        }
+        
+        .stress-badge.normal {
+            background: #d4edda;
+            color: #28a745;
+        }
+        
+        .field-crop {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+        
+        .stress-bars {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .stress-bar {
+            flex: 1;
+        }
+        
+        .stress-bar-label {
+            font-size: 10px;
+            color: #6c757d;
+            margin-bottom: 3px;
+        }
+        
+        .stress-bar-track {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .stress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        /* Карта */
+        #map {
+            flex: 1;
+            position: relative;
+        }
+        
+        /* Leaflet popup стилизация */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .popup-content {
+            padding: 0;
+            min-width: 300px;
+        }
+        
+        .popup-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+        }
+        
+        .popup-header h3 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+        
+        .popup-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .popup-body {
+            padding: 20px;
+        }
+        
+        .popup-section {
+            margin-bottom: 20px;
+        }
+        
+        .popup-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .popup-section h4 {
+            font-size: 13px;
+            color: #495057;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .popup-section h4 span {
+            margin-right: 5px;
+        }
+        
+        .stress-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .stress-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+        
+        .stress-info {
+            flex: 1;
+        }
+        
+        .stress-name {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 2px;
+        }
+        
+        .stress-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .stress-status {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        
+        .recommendation {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #856404;
+        }
+        
+        .recommendation.critical {
+            background: #fee;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .recommendation.normal {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        
+        .indices-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .index-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .index-name {
+            font-size: 10px;
+            color: #6c757d;
+            margin-bottom: 3px;
+        }
+        
+        .index-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        /* Loader */
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2000;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Боковая панель -->
+        <div id="sidebar">
+            <div class="header">
+                <h1>🌾 Мониторинг стрессов</h1>
+                <p>Кызылординская область, Казахстан</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="icon">📊</div>
+                    <div class="label">Всего полей</div>
+                    <div class="value" id="totalFields">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">⚠️</div>
+                    <div class="label">Требуют внимания</div>
+                    <div class="value" id="alertFields">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">💧</div>
+                    <div class="label">Водный стресс</div>
+                    <div class="value" id="waterStress">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🧂</div>
+                    <div class="label">Солевой стресс</div>
+                    <div class="value" id="salineStress">-</div>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <h3>Уровни стресса</h3>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #28a745;"></div>
+                    <div class="legend-label">Норма (0-40%)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffc107;"></div>
+                    <div class="legend-label">Умеренный (40-70%)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #dc3545;"></div>
+                    <div class="legend-label">Критический (70-100%)</div>
+                </div>
+            </div>
+            
+            <div class="filters">
+                <h3>Фильтры</h3>
+                <div class="filter-group">
+                    <label>Тип стресса</label>
+                    <select id="stressFilter">
+                        <option value="all">Все поля</option>
+                        <option value="water">Водный стресс</option>
+                        <option value="saline">Солевой стресс</option>
+                        <option value="critical">Критические</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Культура</label>
+                    <select id="cropFilter">
+                        <option value="all">Все культуры</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="field-list">
+                <h3>Список полей</h3>
+                <div id="fieldsList"></div>
+            </div>
+        </div>
+        
+        <!-- Карта -->
+        <div id="map"></div>
+        
+        <!-- Loader -->
+        <div class="loader" id="loader">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Загрузка данных...</div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    <script>
+        // Глобальные переменные
+        let map;
+        let fieldsData = [];
+        let geojsonLayer;
+        const dates = ['250525', '250608', '250706', '250815'];
+        
+        // Инициализация карты
+        function initMap() {
+            map = L.map('map').setView([44.7902, 65.5822], 16);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+        }
+        
+        // Функция детекции водного стресса
+        function detectWaterStress(fieldData) {
+            const ndwiValues = dates.map(d => parseFloat(fieldData[`${d}NDWI_mean`]) || 0);
+            const ndviValues = dates.map(d => parseFloat(fieldData[`${d}NDVI_mean`]) || 0);
+            const lastNDWI = ndwiValues[ndwiValues.length - 1];
+            const lastNDVI = ndviValues[ndviValues.length - 1];
+            
+            let score = 0;
+            
+            if (lastNDWI < -0.2) score = 90;
+            else if (lastNDWI < -0.1) score = 60;
+            else if (lastNDWI < 0) score = Math.abs(lastNDWI) * 200;
+            
+            const ndviTrend = ndviValues[3] - ndviValues[0];
+            if (ndviTrend < -0.1 && lastNDVI < 0.4) {
+                score = Math.min(100, score * 1.3);
+            }
+            
+            return Math.round(score);
+        }
+        
+        // Функция детекции солевого стресса
+        function detectSalineStress(fieldData) {
+            const ndviValues = dates.map(d => parseFloat(fieldData[`${d}NDVI_mean`]) || 0);
+            const gndviValues = dates.map(d => parseFloat(fieldData[`${d}GNDVI_mean`]) || 0);
+            const srValues = dates.map(d => parseFloat(fieldData[`${d}SR_mean`]) || 0);
+            
+            const ndviMean = ndviValues.reduce((a, b) => a + b, 0) / ndviValues.length;
+            const lastGNDVI = gndviValues[gndviValues.length - 1];
+            const srMean = srValues.reduce((a, b) => a + b, 0) / srValues.length;
+            
+            let score = 0;
+            
+            if (ndviMean < 0.25 && lastGNDVI < 0.2) score = 80;
+            else if (ndviMean < 0.3 && srMean < 2.0) score = 60;
+            else if (lastGNDVI < 0.25) score = 40;
+            
+            return Math.round(score);
+        }
+        
+        // Получить цвет по уровню стресса
+        function getStressColor(level) {
+            if (level > 70) return '#dc3545';
+            if (level > 40) return '#ffc107';
+            return '#28a745';
+        }
+        
+        // Получить статус
+        function getStressStatus(level) {
+            if (level > 70) return 'Критический';
+            if (level > 40) return 'Умеренный';
+            return 'Норма';
+        }
+        
+        // Получить класс бейджа
+        function getStressBadgeClass(level) {
+            if (level > 70) return 'critical';
+            if (level > 40) return 'moderate';
+            return 'normal';
+        }
+        
+        // Получить рекомендацию
+        function getRecommendation(waterStress, salineStress) {
+            const maxStress = Math.max(waterStress, salineStress);
+            let rec = '';
+            let className = 'normal';
+            
+            if (waterStress > 70) {
+                rec = '🔴 СРОЧНО: Критический водный стресс. Немедленный полив обязателен.';
+                className = 'critical';
+            } else if (waterStress > 40) {
+                rec = '🟡 ВНИМАНИЕ: Умеренный водный стресс. Увеличить частоту полива на 30-40%.';
+                className = 'moderate';
+            }
+            
+            if (salineStress > 70) {
+                if (rec) rec += ' ';
+                rec += '🔴 КРИТИЧНО: Сильное засоление почвы. Требуется промывка и дренаж.';
+                className = 'critical';
+            } else if (salineStress > 40) {
+                if (rec) rec += ' ';
+                rec += '🟡 ВНИМАНИЕ: Признаки засоления. Контроль ЕС почвы, применение гипса.';
+                if (className !== 'critical') className = 'moderate';
+            }
+            
+            if (!rec) {
+                rec = '🟢 Состояние нормальное. Продолжить текущий режим агротехники.';
+            }
+            
+            return { text: rec, className };
+        }
+        
+        // Создать popup для поля
+        function createPopup(field) {
+            const rec = getRecommendation(field.waterStress, field.salineStress);
+            const lastDate = dates[dates.length - 1];
+            
+            return `
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h3>Поле ${field.id}</h3>
+                        <p>${field.Type} • ${parseFloat(field.area_ha).toFixed(2)} га</p>
+                    </div>
+                    <div class="popup-body">
+                        <div class="popup-section">
+                            <h4><span>💧</span> Водный стресс</h4>
+                            <div class="stress-indicator">
+                                <div class="stress-icon" style="background: ${getStressColor(field.waterStress)}20; color: ${getStressColor(field.waterStress)}">
+                                    💧
+                                </div>
+                                <div class="stress-info">
+                                    <div class="stress-name">Уровень</div>
+                                    <div class="stress-value" style="color: ${getStressColor(field.waterStress)}">${field.waterStress}%</div>
+                                    <div class="stress-status" style="color: ${getStressColor(field.waterStress)}">${getStressStatus(field.waterStress)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="popup-section">
+                            <h4><span>🧂</span> Солевой стресс</h4>
+                            <div class="stress-indicator">
+                                <div class="stress-icon" style="background: ${getStressColor(field.salineStress)}20; color: ${getStressColor(field.salineStress)}">
+                                    🧂
+                                </div>
+                                <div class="stress-info">
+                                    <div class="stress-name">Уровень</div>
+                                    <div class="stress-value" style="color: ${getStressColor(field.salineStress)}">${field.salineStress}%</div>
+                                    <div class="stress-status" style="color: ${getStressColor(field.salineStress)}">${getStressStatus(field.salineStress)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="popup-section">
+                            <h4><span>📊</span> Ключевые индексы (15.08)</h4>
+                            <div class="indices-grid">
+                                <div class="index-item">
+                                    <div class="index-name">NDVI</div>
+                                    <div class="index-value">${parseFloat(field[`${lastDate}NDVI_mean`]).toFixed(2)}</div>
+                                </div>
+                                <div class="index-item">
+                                    <div class="index-name">NDWI</div>
+                                    <div class="index-value">${parseFloat(field[`${lastDate}NDWI_mean`]).toFixed(2)}</div>
+                                </div>
+                                <div class="index-item">
+                                    <div class="index-name">GNDVI</div>
+                                    <div class="index-value">${parseFloat(field[`${lastDate}GNDVI_mean`]).toFixed(2)}</div>
+                                </div>
+                                <div class="index-item">
+                                    <div class="index-name">SR</div>
+                                    <div class="index-value">${parseFloat(field[`${lastDate}SR_mean`]).toFixed(2)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="popup-section">
+                            <h4><span>💡</span> Рекомендации</h4>
+                            <div class="recommendation ${rec.className}">
+                                ${rec.text}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Загрузка и обработка данных
+        async function loadData() {
+            try {
+                // Загрузка CSV
+                const csvResponse = await fetch('uav_fields_wide_with_stats.csv');
+                const csvText = await csvResponse.text();
+                
+                // Парсинг CSV
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const values = lines[i].split(',');
+                    const field = {};
+                    headers.forEach((h, idx) => {
+                        field[h] = values[idx];
+                    });
+                    
+                    // Анализ стрессов
+                    field.waterStress = detectWaterStress(field);
+                    field.salineStress = detectSalineStress(field);
+                    field.primaryLevel = Math.max(field.waterStress, field.salineStress);
+                    field.alert = field.primaryLevel > 40;
+                    
+                    fieldsData.push(field);
+                }
+                
+                // Загрузка GeoJSON
+                const geojsonResponse = await fetch('field4326.geojson');
+                const geojsonData = await geojsonResponse.json();
+                
+                // Отображение на карте
+                geojsonLayer = L.geoJSON(geojsonData, {
+                    style: function(feature) {
+                        const fieldId = feature.properties.id;
+                        const field = fieldsData.find(f => parseInt(f.id) === fieldId);
+                        
+                        if (field) {
+                            return {
+                                fillColor: getStressColor(field.primaryLevel),
+                                weight: 2,
+                                opacity: 1,
+                                color: 'white',
+                                fillOpacity: 0.7
+                            };
+                        }
+                        
+                        return {
+                            fillColor: '#999',
+                            weight: 2,
+                            opacity: 1,
+                            color: 'white',
+                            fillOpacity: 0.3
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const fieldId = feature.properties.id;
+                        const field = fieldsData.find(f => parseInt(f.id) === fieldId);
+                        
+                        if (field) {
+                            layer.bindPopup(createPopup(field), {
+                                maxWidth: 350,
+                                className: 'custom-popup'
+                            });
+                            
+                            layer.on('mouseover', function() {
+                                this.setStyle({
+                                    weight: 4,
+                                    color: '#333'
+                                });
+                            });
+                            
+                            layer.on('mouseout', function() {
+                                this.setStyle({
+                                    weight: 2,
+                                    color: 'white'
+                                });
+                            });
+                        }
+                    }
+                }).addTo(map);
+                
+                // Центрирование карты
+                map.fitBounds(geojsonLayer.getBounds());
+                
+                // Обновление статистики и списка
+                updateStats();
+                updateFieldsList();
+                populateCropFilter();
+                
+                // Скрыть loader
+                document.getElementById('loader').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                document.getElementById('loader').innerHTML = '<div style="color: white;">Ошибка загрузки данных</div>';
+            }
+        }
+        
+        // Обновить статистику
+        function updateStats() {
+            const total = fieldsData.length;
+            const alert = fieldsData.filter(f => f.alert).length;
+            const water = fieldsData.filter(f => f.waterStress > 40).length;
+            const saline = fieldsData.filter(f => f.salineStress > 40).length;
+            
+            document.getElementById('totalFields').textContent = total;
+            document.getElementById('alertFields').textContent = alert;
+            document.getElementById('waterStress').textContent = water;
+            document.getElementById('salineStress').textContent = saline;
+        }
+        
+        // Обновить список полей
+        function updateFieldsList(filteredFields = null) {
+            const fields = filteredFields || fieldsData;
+            const container = document.getElementById('fieldsList');
+            container.innerHTML = '';
+            
+            // Сортировка по уровню стресса
+            const sorted = [...fields].sort((a, b) => b.primaryLevel - a.primaryLevel);
+            
+            sorted.forEach(field => {
+                const item = document.createElement('div');
+                item.className = 'field-item';
+                item.innerHTML = `
+                    <div class="field-item-header">
+                        <div class="field-id">Поле ${field.id}</div>
+                        <div class="stress-badge ${getStressBadgeClass(field.primaryLevel)}">
+                            ${getStressStatus(field.primaryLevel)}
+                        </div>
+                    </div>
+                    <div class="field-crop">${field.Type} • ${parseFloat(field.area_ha).toFixed(2)} га</div>
+                    <div class="stress-bars">
+                        <div class="stress-bar">
+                            <div class="stress-bar-label">💧 ${field.waterStress}%</div>
+                            <div class="stress-bar-track">
+                                <div class="stress-bar-fill" style="width: ${field.waterStress}%; background: ${getStressColor(field.waterStress)};"></div>
+                            </div>
+                        </div>
+                        <div class="stress-bar">
+                            <div class="stress-bar-label">🧂 ${field.salineStress}%</div>
+                            <div class="stress-bar-track">
+                                <div class="stress-bar-fill" style="width: ${field.salineStress}%; background: ${getStressColor(field.salineStress)};"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    // Найти соответствующий слой
+                    geojsonLayer.eachLayer(layer => {
+                        if (layer.feature.properties.id === parseInt(field.id)) {
+                            map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+                            layer.openPopup();
+                        }
+                    });
+                });
+                
+                container.appendChild(item);
+            });
+        }
+        
+        // Заполнить фильтр культур
+        function populateCropFilter() {
+            const crops = [...new Set(fieldsData.map(f => f.Type))].sort();
+            const select = document.getElementById('cropFilter');
+            
+            crops.forEach(crop => {
+                const option = document.createElement('option');
+                option.value = crop;
+                option.textContent = crop;
+                select.appendChild(option);
+            });
+        }
+        
+        // Применить фильтры
+        function applyFilters() {
+            const stressFilter = document.getElementById('stressFilter').value;
+            const cropFilter = document.getElementById('cropFilter').value;
+            
+            let filtered = fieldsData;
+            
+            // Фильтр по типу стресса
+            if (stressFilter === 'water') {
+                filtered = filtered.filter(f => f.waterStress > 40);
+            } else if (stressFilter === 'saline') {
+                filtered = filtered.filter(f => f.salineStress > 40);
+            } else if (stressFilter === 'critical') {
+                filtered = filtered.filter(f => f.primaryLevel > 70);
+            }
+            
+            // Фильтр по культуре
+            if (cropFilter !== 'all') {
+                filtered = filtered.filter(f => f.Type === cropFilter);
+            }
+            
+            // Обновить карту
+            geojsonLayer.eachLayer(layer => {
+                const fieldId = layer.feature.properties.id;
+                const field = filtered.find(f => parseInt(f.id) === fieldId);
+                
+                if (field) {
+                    layer.setStyle({ opacity: 1, fillOpacity: 0.7 });
+                } else {
+                    layer.setStyle({ opacity: 0.3, fillOpacity: 0.1 });
+                }
+            });
+            
+            updateFieldsList(filtered);
+        }
+        
+        // События
+        document.getElementById('stressFilter').addEventListener('change', applyFilters);
+        document.getElementById('cropFilter').addEventListener('change', applyFilters);
+        
+        // Инициализация
+        initMap();
+        loadData();
+    </script>
+</body>
+</html>
