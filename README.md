@@ -199,7 +199,7 @@ Senior Researcher, Kazan Federal University
 
 - 📧 Email: [amgafurov@kpfu.ru]
 - 🔬 ResearchGate: [[профиль](https://www.researchgate.net/profile/Artur-Gafurov)]
-- 💼 LinkedIn: [профиль]
+- 💼 LinkedIn: [[профиль](https://linkedin.com/in/arturgafurov)]
 
 ---
 
