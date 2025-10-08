@@ -2,10 +2,10 @@
 
 **Интерактивная веб-карта для детекции водного и солевого стресса на основе мультиспектральных данных БПЛА**
 
-[![GitHub Pages](https://img.shields.io/badge/demo-live-success)](https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/)
+[![GitHub Pages](https://img.shields.io/badge/demo-live-success)](https://noaaakwey.github.io/crop-stress-monitor/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-🔗 **[Открыть интерактивную карту →](https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/)**
+🔗 **[Открыть интерактивную карту →](https://noaakwey.github.io/crop-stress-monitor/)**
 
 ---
 
@@ -23,47 +23,6 @@
 - **GeoJSON** — пространственные данные полей
 - **Rule-Based AI** — экспертная система анализа
 - **GitHub Pages** — бесплатный хостинг
-
----
-
-## 🚀 Быстрый старт
-
-### Развёртывание на GitHub Pages
-
-1. **Создайте новый репозиторий на GitHub:**
-   ```
-   Имя: crop-stress-monitor
-   Описание: Interactive map for crop stress detection
-   Public ✓
-   ```
-
-2. **Загрузите файлы в репозиторий:**
-   ```bash
-   # Клонируйте репозиторий
-   git clone https://github.com/YOUR_USERNAME/crop-stress-monitor.git
-   cd crop-stress-monitor
-   
-   # Скопируйте файлы проекта:
-   # - index.html
-   # - uav_fields_wide_with_stats.csv
-   # - field4326.geojson
-   
-   # Добавьте в git
-   git add .
-   git commit -m "Initial commit: Interactive stress map"
-   git push origin main
-   ```
-
-3. **Активируйте GitHub Pages:**
-   - Откройте `Settings` → `Pages`
-   - Source: `Deploy from a branch`
-   - Branch: `main` / `root`
-   - Нажмите `Save`
-
-4. **Готово!** Через 1-2 минуты сайт будет доступен по адресу:
-   ```
-   https://YOUR_USERNAME.github.io/crop-stress-monitor/
-   ```
 
 ---
 
@@ -138,13 +97,6 @@ crop-stress-monitor/
 - Peer-reviewed исследований по дистанционному зондированию
 - Адаптация для аридных условий Казахстана
 - Калибровка под специфику орошаемого земледелия
-
-### Публикации (рекомендуется)
-
-Рекомендуемые журналы для публикации результатов:
-- **Remote Sensing** (IF 5.0, Q1)
-- **Agricultural Water Management** (IF 6.7, Q1)
-- **Computers and Electronics in Agriculture** (IF 8.3, Q1)
 
 ---
 
@@ -245,15 +197,15 @@ if (ndviMean < 0.25 && lastGNDVI < 0.2) score = 80;
 **Artur Gafurov, PhD**  
 Senior Researcher, Kazan Federal University
 
-- 📧 Email: [ваш email]
-- 🔬 ResearchGate: [профиль]
+- 📧 Email: [amgafurov@kpfu.ru]
+- 🔬 ResearchGate: [[профиль](https://www.researchgate.net/profile/Artur-Gafurov)]
 - 💼 LinkedIn: [профиль]
 
 ---
 
 ## 🙏 Благодарности
 
-- Институт экологических наук КФУ
+- Институт Экологии, биотехнологии и природопользования КФУ
 - Кызылординская область, Казахстан
 - OpenStreetMap Contributors
 - Leaflet.js Community
@@ -262,10 +214,10 @@ Senior Researcher, Kazan Federal University
 
 ## 📚 Дополнительная документация
 
-- [Методология детекции стрессов](docs/methodology.md)
-- [Калибровка системы](docs/calibration.md)
-- [API спектральных индексов](docs/spectral_indices.md)
-- [Примеры использования](docs/examples.md)
+- [Методология детекции стрессов](docs/methodology.md) - разрабатывается
+- [Калибровка системы](docs/calibration.md) - разрабатывается
+- [API спектральных индексов](docs/spectral_indices.md) - разрабатывается
+- [Примеры использования](docs/examples.md) - разрабатывается
 
 ---
 
